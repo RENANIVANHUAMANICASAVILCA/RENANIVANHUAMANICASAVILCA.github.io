@@ -302,5 +302,25 @@ window.addEventListener('resize', ajustarAlturaDeck);
   </blockquote>
 </section>
 -->
+<script>
+  card.addEventListener('click', () => {
+  if (card.classList.contains('activa')) {
+    card.classList.remove('activa');
+  } else {
+    document.querySelectorAll('.card-galeria').forEach(c => c.classList.remove('activa'));
+    card.classList.add('activa');
+  }
+});
+
+  document.querySelectorAll('.card-galeria').forEach(card => {
+    card.addEventListener('click', () => {
+      // Elimina clase "activa" de todas
+      document.querySelectorAll('.card-galeria').forEach(c => c.classList.remove('activa'));
+      // Agrega clase "activa" solo a la clicada
+      card.classList.add('activa');
+    });
+  });
+</script>
+
 
 
