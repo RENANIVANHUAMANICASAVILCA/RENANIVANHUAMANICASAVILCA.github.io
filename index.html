@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fotografías | Dias</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Para forzar el footer siempre abajo en páginas cortas */
+    html, body {
+      height: 100%;
+      min-height: 100vh;
+      box-sizing: border-box;
+      position: relative;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    main {
+      flex: 1 0 auto;
+    }
+    footer {
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header con perfil -->
+  <header>
+    <div class="perfil">
+      <img src="img/Foto.jpg" alt="Foto de perfil" class="avatar">
+      <div>
+        <h1>Iván</h1>
+        <p>Momentos cotidianos</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Sección destacado -->
+    <section class="destacado">
+      <h2>HOY</h2>
+      <div class="foto-destacada card">
+        <img src="img/Love.png" alt="Foto destacada">
+        <div class="desc">
+          <h3>Art</h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- Galería de fotos estilo baraja 3D -->
+    <div class="deck-galeria" id="deckGaleria">
+      <div class="card-galeria" style="--i:-2;">
+        <img src="img/ayacucho.jpg" alt="Ayacucho">
+        <div class="info-galeria">
+          <h4>Ayacucho</h4>
+          <p>Parque de Huamanga</p>
+        </div>
+      </div>
+      <div class="card-galeria" style="--i:-1;">
+        <img src="img/Ayacuchomejor.jpg" alt="Ayacucho">
+        <div class="info-galeria">
+          <h4>Sucre</h4>
+          <p>...</p>
+        </div>
+      </div>
+      <div class="card-galeria" style="--i:0;">
+        <img src="img/Noche_huamanga.jpg" alt="Noches">
+        <div class="info-galeria">
+          <h4>Huamanga</h4>
+          <p>Una noche, el susurro del viento asoma su precipitar en lo más alto de su conocer, las brisas gélidas acarician esa piel tan suave y única, como si se tratase de un tocar melancólico de un posar animal en los pétalos de una rosa. Su presencia engendra el sentido del existir, define la perfección; pero más que ello, es sólo un milagro de Dios, esas que sólo pasan una vez, esas que dejan una semilla que no nunca llegan a brotar en su decadencia; así como los pensares de cada noche, que sólo llegan a concretarse en lo ideal. Su existencia es un suspiro del corazón.</p>
+        </div>
+      </div>
+      <div class="card-galeria" style="--i:1;">
+        <img src="img/Restaurante.jpg" alt="Restaurantes">
+        <div class="info-galeria">
+          <h4>Comida?</h4>
+          <p>...</p>
+        </div>
+      </div>
+      <div class="card-galeria" style="--i:2;">
+        <img src="img/Noche_estrellada.jpg" alt="Paisajes">
+        <div class="info-galeria">
+          <h4>...</h4>
+          <p>...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal para imagen -->
+  <div class="modal-imagen" id="modalImagen" style="display:none;">
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal-contenido" id="modalContenido">
+      <button id="cerrarModal" title="Cerrar" aria-label="Cerrar modal">&times;</button>
+      <img src="" alt="" id="modalImg">
+      <p id="modalDesc"></p>
+    </div>
+  </div>
+
+
+  <!-- Botón flotante -->
+  <button id="comentbox-float-btn" title="Abrir comentarios">💬 Comentarios</button>
+
+  <!-- Panel flotante de comentarios -->
+  <div id="comentbox-float-panel" class="comentbox-float-panel" style="display:none;">
+    <button id="comentbox-close" title="Cerrar">&times;</button>
+    <section class="comentbox-container">
+      <div class="comentbox-inspirador"></div>
+      <hr class="comentbox-hr">
+      <h2 class="comentbox-title2">Comentarios del blog</h2>
+      <form id="comentbox-form" autocomplete="off">
+        <input type="text" id="comentbox-nombre" placeholder="Tu nombre" maxlength="32" required>
+        <textarea id="comentbox-comentario" placeholder="Escribe tu comentario..." maxlength="260" required></textarea>
+        <button type="submit">Enviar</button>
+      </form>
+      <div id="comentbox-lista"></div>
+    </section>
+  </div>
+
+  <!-- Supabase JS LIBRARY SIEMPRE PRIMERO -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Oculta la descripción de la foto destacada (sólo visual, el modal la muestra)
+      document.querySelectorAll('.foto-destacada .desc').forEach(el => {
+        el.style.display = 'none';
+      });
+
+      // -------- MODAL IMAGEN --------
+      const modal          = document.getElementById('modalImagen');
+      const modalImg       = document.getElementById('modalImg');
+      const modalDesc      = document.getElementById('modalDesc');
+      const cerrarModalBtn = document.getElementById('cerrarModal');
+      const modalOverlay   = document.getElementById('modalOverlay');
+
+      // Abrir modal desde destacado
+      const fotoDestacadaCard = document.querySelector('.foto-destacada');
+      if (fotoDestacadaCard) {
+        fotoDestacadaCard.addEventListener('click', () => {
+          const img = fotoDestacadaCard.querySelector('img');
+          const desc = fotoDestacadaCard.querySelector('.desc h3')?.innerText || img.alt || '';
+          mostrarModal(img.src, desc);
+        });
+      }
+
+      // Abrir modal desde galería tipo baraja
+      document.querySelectorAll('.card-galeria').forEach((card) => {
+        card.addEventListener('click', () => {
+          const img = card.querySelector('img');
+          const desc = card.querySelector('p')?.innerText ||
+                       card.querySelector('h4')?.innerText ||
+                       img.alt || '';
+          mostrarModal(img.src, desc);
+        });
+      });
+
+      function mostrarModal(src, desc) {
+        modalImg.src = src;
+        modalImg.alt = desc;
+        modalDesc.textContent = desc;
+        modal.style.display = 'flex';
+        modalImg.classList.remove('animar-modal');
+        requestAnimationFrame(() => {
+          modal.classList.add('abierto');
+          setTimeout(() => {
+            modalImg.classList.add('animar-modal');
+          }, 10);
+        });
+        document.body.style.overflow = 'hidden';
+      }
+      function cerrarModal() {
+        modal.classList.remove('abierto');
+        modalImg.classList.remove('animar-modal');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+          modal.style.display = 'none';
+          modalImg.src = '';
+          modalDesc.textContent = '';
+        }, 200);
+      }
+      cerrarModalBtn?.addEventListener('click', cerrarModal);
+      modalOverlay?.addEventListener('click', cerrarModal);
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') cerrarModal();
+      });
+
+      // -------- PANEL FLOTANTE DE COMENTARIOS --------
+      const supabaseUrl = "https://qngbgcvwyqwiravzctik.supabase.co";
+      const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuZ2JnY3Z3eXF3aXJhdnpjdGlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIwMjA4MTIsImV4cCI6MjA2NzU5NjgxMn0.K-jmMLbHvZEfiI6EYX0EhZ-hjzCovH108sZWFarRCZg";
+      const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+      const floatBtn = document.getElementById('comentbox-float-btn');
+      const floatPanel = document.getElementById('comentbox-float-panel');
+      const closeBtn = document.getElementById('comentbox-close');
+      const lista = document.getElementById('comentbox-lista');
+
+      floatBtn.onclick = () => {
+        floatPanel.style.display = 'flex';
+        cargarComentarios();
+      };
+      closeBtn.onclick = () => floatPanel.style.display = 'none';
+
+      window.addEventListener('keydown', e => {
+        if (floatPanel.style.display === 'flex' && e.key === "Escape") floatPanel.style.display = 'none';
+      });
+
+      async function cargarComentarios() {
+        lista.innerHTML = "<div style='color:#b3b3b3;padding:7px 0;'>Cargando...</div>";
+        const { data, error } = await supabase
+          .from('comentarios')
+          .select('*')
+          .order('created_at', { ascending: false });
+        lista.innerHTML = "";
+        if (error) {
+          lista.innerHTML = "<div style='color:#e53e3e;'>Error al cargar comentarios.</div>";
+          return;
+        }
+        if (data && data.length > 0) {
+          data.forEach(c => {
+            const div = document.createElement('div');
+            div.className = 'comentbox-item';
+            div.innerHTML = `<strong>${escapeHtml(c.nombre)}:</strong> ${escapeHtml(c.comentario)}<br><small>${new Date(c.created_at).toLocaleString()}</small>`;
+            lista.appendChild(div);
+          });
+        } else {
+          lista.innerHTML = "<div style='color:#7a7a7a;font-size:0.97em;padding:7px 3px;'>No hay comentarios aún. ¡Sé el primero!</div>";
+        }
+      }
+
+      function escapeHtml(unsafe) {
+        return String(unsafe)
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+      }
+
+
+      document.getElementById('comentbox-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const nombre = document.getElementById('comentbox-nombre').value.trim().substring(0, 32);
+        const comentario = document.getElementById('comentbox-comentario').value.trim().substring(0, 260);
+        if (nombre && comentario) {
+          await supabase.from('comentarios').insert([{ nombre, comentario }]);
+          this.reset();
+          cargarComentarios();
+        }
+      });
+    });
+  </script>
+
+   <footer>
+    <p>&copy; 2025 R. Ivan H. Casavilca |
+      <a href="https://www.instagram.com/huamanicasavilcaivan?igsh=MnJrcGR1a2dnMHFq">Instagram</a> · <a href="#">Facebook</a> · <a href="#">X</a>
+    </p>
+  </footer>
+</body>
+
+<script>
+function ajustarAlturaDeck() {
+  const deck = document.querySelector('.deck-galeria');
+  if (!deck) return;
+  const cards = Array.from(deck.children);
+
+  // Obtener la card que llega más abajo
+  let maxBottom = 0;
+  const deckRect = deck.getBoundingClientRect();
+
+  cards.forEach(card => {
+    const cardRect = card.getBoundingClientRect();
+    // El bottom relativo al deck
+    const relativeBottom = cardRect.bottom - deckRect.top;
+    if (relativeBottom > maxBottom) maxBottom = relativeBottom;
+  });
+
+  // Suma un margen por hover/shadow si quieres (opcional)
+  const margenExtra = 24; // px
+  deck.style.height = Math.ceil(maxBottom + margenExtra) + 'px';
+}
+
+// Ejecutar al cargar y cuando cambie el contenido/tamaño
+window.addEventListener('DOMContentLoaded', ajustarAlturaDeck);
+window.addEventListener('resize', ajustarAlturaDeck);
+</script>
+
+</html>
+
+/*
+
+ <!-- Sección de reflexión/pensamiento AL FINAL antes del footer -->
+
+<!--
+<section class="comentario">
+  <h2>Comentario</h2>
+  <blockquote>
+    “A veces las pequeñas cosas ocupan el mayor espacio en nuestro corazón.”
+  </blockquote>
+</section>
+-->
+
+
