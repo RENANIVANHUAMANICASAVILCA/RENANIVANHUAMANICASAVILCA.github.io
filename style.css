@@ -55,7 +55,6 @@ header::before, header::after {
   filter: blur(0.9px);
   pointer-events: none;
   z-index: 1;
-  animation: headerLineAnim 4.5s linear infinite;
 }
 header::before { top: 12%; animation-delay: 0s; }
 header::after { top: 81%; animation-delay: 2.3s; }
@@ -74,7 +73,7 @@ header .perfil::before, header .perfil::after {
   opacity: .10;
   background: linear-gradient(180deg, #fff8 18%, #d1d1d1 60%, #fff0 100%);
   box-shadow: 0 0 14px 2.8px #fff6, 0 0 22px 6px #e5e5e555;
-  animation: lateralPulse 2.7s infinite cubic-bezier(.4,1.2,.7,1.1) alternate;
+
 }
 header .perfil::before { left: 8px; animation-delay: .6s;}
 header .perfil::after  { right: 8px; animation-delay: 0s;}
@@ -112,7 +111,7 @@ header .perfil {
   position: relative;
   z-index: 2;
   filter: grayscale(.02) contrast(1.15) brightness(1.10) blur(0.2px);
-  animation: avatarNeonSpin 2.6s cubic-bezier(.5,1.5,.5,1) both, avatarAuraPulse 2.6s infinite alternate;
+ 
   transition: box-shadow .29s, filter .21s;
 }
 @keyframes avatarNeonSpin {
@@ -120,23 +119,9 @@ header .perfil {
   35% {transform: scale(1.08) rotateZ(7deg);}
   to   {transform: scale(1) rotateZ(0);}
 }
-@keyframes avatarAuraPulse {
-  0% { box-shadow: 0 0 16px 7px #fff6 inset, 0 0 24px 7px #ededed, 0 0 50px 2px #d1d1d1bb; filter: blur(0.25px) brightness(1.04);}
-  100% { box-shadow: 0 0 40px 14px #fff8 inset, 0 0 80px 17px #f5f5f5, 0 0 128px 12px #fafafa; filter: blur(0.17px) brightness(1.14);}
-}
-.avatar::after {
-  content: '';
-  position: absolute;
-  top: -15px; left: -15px;
-  width: 140px; height: 140px;
-  border-radius: 50%;
-  border: 3px solid #fff6;
-  box-shadow: 0 0 34px 15px #fff8, 0 0 66px 6px #ededed;
-  opacity: 0.73;
-  pointer-events: none;
-  animation: avatarHalo 2.2s infinite alternate cubic-bezier(.6,.7,.5,1.1);
-}
-@keyframes avatarHalo { from { opacity: 0.53; filter: blur(2.4px);} to { opacity: 0.97; filter: blur(7.1px);} }
+
+
+/*
 .avatar:hover, .avatar:focus {
   filter: grayscale(0) contrast(1.28) brightness(1.15) blur(0.1px);
   box-shadow:
@@ -146,6 +131,8 @@ header .perfil {
   transition: box-shadow .33s, filter .13s;
   animation: glitchAvatar .19s steps(2, end) 2;
 }
+*/
+
 @keyframes glitchAvatar {
   0% { filter: blur(0.7px) grayscale(1);}
   60% { transform: scale(1.08) skewY(2deg);}
@@ -169,6 +156,7 @@ header .perfil {
   60% { letter-spacing: 3.5px;}
   to   { opacity: 1; letter-spacing: .42px; filter: blur(0);}
 }
+/*
 .perfil h1::after {
   content: '';
   display: block;
@@ -181,12 +169,16 @@ header .perfil {
   opacity: .93;
   animation: underlineSweep 2.5s infinite cubic-bezier(.7,.5,.3,.98);
 }
+*/
+
+/*
 @keyframes underlineSweep {
   0% { width: 0;}
   15% { width: 42%;}
   70% { width: 68%;}
   100% { width: 58%;}
 }
+*/
 .perfil p {
   color: #232323;
   font-size: 1.19rem;
@@ -213,13 +205,9 @@ header .perfil {
     #ebebeb33 0px, #fff0 2px, #ebebeb22 3px, #fff0 7px
   );
   opacity: .20;
-  animation: scanlineAnim 2.8s linear infinite;
+  /* animation: scanlineAnim 2.8s linear infinite; */
   z-index: 4;
   pointer-events: none;
-}
-@keyframes scanlineAnim {
-  0% { background-position-y: 0;}
-  100% { background-position-y: 20px;}
 }
 
 /* =========================== DESTACADO =========================== */
